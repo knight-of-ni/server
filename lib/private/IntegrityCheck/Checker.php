@@ -337,7 +337,20 @@ class Checker {
 		$differencesB = array_diff($currentInstanceHashes, $expectedHashes);
 		$differences = array_unique(array_merge($differencesA, $differencesB));
 		$differenceArray = [];
+
+		# Nasty hack to silence the integrity checker for files patched during the build process or files we simply don't care about
+		$excludedFilenames = [
+//sedplaceholder			];
+
 		foreach ($differences as $filename => $hash) {
+
+			# Skip if the file in question matches our exclusion list
+			foreach ($excludedFilenames as $excludedFilename) {
+			  if (strpos($filename, $excludedFilename)!==false) {
+			    break 2;
+			  }
+			}
+
 			// Check if file should not exist in the new signature table
 			if (!array_key_exists($filename, $expectedHashes)) {
 				$differenceArray['EXTRA_FILE'][$filename]['expected'] = '';
